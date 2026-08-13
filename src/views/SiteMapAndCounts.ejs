@@ -1,0 +1,21 @@
+<%- include('./partials/PlotHeader.ejs') %>
+<main>
+  <img src="<%= data.site.site_map_image.url %>" class="w-3/4 mx-auto" />
+
+  <p class="text-2xl font-medium underline">Flat Details</p>
+  <div>
+    <% data.counts.forEach((count) => { %>
+    <div class="flex items-center mt-3">
+      <p class="font-bold"><%= count._id %> -</p>
+      <div class="flex items-center flex-wrap">
+        <% count.plots.forEach((plot,index)=> { %>
+        <p class="ml-3"><%= plot.plot_no %></p>
+        <% if(count.plots.length > index + 1){ %>
+        <span>,</span>
+        <% } %> <% }) %>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</main>
+<%- include('./partials/Footer.ejs') %>

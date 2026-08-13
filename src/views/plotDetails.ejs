@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flat Details</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+      }
+      th,
+      td {
+        border: 1px solid #333;
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+        width: 35%;
+      }
+      .page-break {
+        page-break-after: always;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flat Details</h1>
+
+    <table>
+      <th>Apartment Project Name</th>
+      <td><%= site_name %></td>
+    </table>
+    
+
+    <% if (Array.isArray(plotDetails)) { %> <%
+    plotDetails.forEach(function(plot, index) { %>
+    <table>
+        <th>Flat No</th>
+        <td><%= plot.plot_no %></td>
+      </tr>
+      <tr>
+        <th>Block / Tower</th>
+        <td><%= plot.tower_name || plot.block %></td>
+      </tr>
+      <tr>
+        <th>Project Owner</th>
+        <td><%= plot.owner %></td>
+      </tr>
+      <tr>
+        <th>Super Built-up Area (Sq.ft)</th>
+        <td><%= plot.super_built_up_area || plot.total_area %></td>
+      </tr>
+      <tr>
+        <th>Price Per Sq.ft</th>
+        <td><%= plot.price_per_sqft %></td>
+      </tr>
+      <tr>
+        <th>Final Agreement Value</th>
+        <td><%= plot.final_agreement_value || plot.mrp %></td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><%= plot.plot_status %></td>
+      </tr>
+    </table>
+    <div class="page-break"></div>
+    <div class="page-break">
+      <tr>
+        <th>Project Map Image</th>
+          <td>
+            <img src="<%= site_map_image.url %>" alt="" style="width: 100%" />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Patta Document</th>
+        <td>
+          <img
+            src="<%= plotDetails.patta_document.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Layout Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.layout_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Building Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.building_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>DTCP Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.dtcp_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    
+
+    <% if (index < plotDetails.length - 1) { %>
+    <div class="page-break"></div>
+    <% } %> <% }) %> <% } else { %>
+    <table>
+      <tr>
+        <th>Flat No</th>
+        <td><%= plotDetails.plot_no %></td>
+      </tr>
+      <tr>
+        <th>Block / Tower</th>
+        <td><%= plotDetails.tower_name || plotDetails.block %></td>
+      </tr>
+      <tr>
+        <th>Project Owner</th>
+        <td><%= plotDetails.owner %></td>
+      </tr>
+      <tr>
+        <th>Super Built-up Area (Sq.ft)</th>
+        <td><%= plotDetails.super_built_up_area || plotDetails.total_area %></td>
+      </tr>
+      <tr>
+        <th>Price Per Sq.ft</th>
+        <td><%= plotDetails.price_per_sqft %></td>
+      </tr>
+      <tr>
+        <th>Final Agreement Value</th>
+        <td><%= plotDetails.final_agreement_value || plotDetails.mrp %></td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td><%= plotDetails.plot_status %></td>
+      </tr>
+    </table>
+    <div class="page-break"></div>
+    <div class="page-break">
+      <tr>
+        <th>Project Map Image</th>
+          <td>
+            <img src="<%= site_map_image.url %>" alt="" style="width: 100%" />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Patta Document</th>
+        <td>
+          <img
+            src="<%= plotDetails.patta_document.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Layout Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.layout_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>Building Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.building_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <div class="page-break">
+      <tr>
+        <th>DTCP Approval</th>
+        <td>
+          <img
+            src="<%= plotDetails.dtcp_approval.url %>"
+            alt=""
+            style="width: 100%"
+          />
+        </td>
+      </tr>
+    </div>
+    <% } %>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      @page {
+        size: A4;
+        margin: 160px 70px 60px 70px; /* top right bottom left — increased top */
+      }
+      body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #000;
+        margin: 0;
+        padding: 0;
+      }
+      .header {
+        text-align: right;
+        margin-bottom: 35px;
+      }
+      .title {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: underline;
+        margin-bottom: 25px;
+        letter-spacing: 0.5px;
+      }
+      .content p {
+        text-align: justify;
+        margin: 0 0 25px 0;
+      }
+      table {
+        border-collapse: collapse;
+        margin: 10px auto; /* auto centers the table horizontally */
+        font-size: 12px;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #000;
+      }
+      th,
+      td {
+        padding: 5px 8px;
+        text-align: center;
+        vertical-align: middle;
+      }
+      th {
+        font-weight: bold;
+      }
+      .col-sl {
+        width: 45px;
+      }
+      .col-details {
+        width: 200px;
+      }
+      .col-area {
+        width: 75px;
+      }
+      .col-uds {
+        width: 65px;
+      }
+      sup {
+        font-size: 9px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">Date : <%= date %></div>
+
+    <div class="title">ALLOTMENT LETTER</div>
+
+    <div class="content">
+      <p>
+        We hereby inform that our Residential Flat at &ldquo;<strong
+          ><%= site_name %></strong
+        >&rdquo; Flat No. <strong><%= plotDetails.plot_no %></strong> ( <%=
+        plotDetails.floor_no %><sup>rd</sup> Floor) is allotted to
+        <strong><%= client_name %></strong> residing at <%= client_address %>.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="col-sl">Sl.<br />No.</th>
+            <th class="col-details">Flat Details</th>
+            <th class="col-area">
+              Super<br />Built-up<br />Area<br />(Sq. Ft.)
+            </th>
+            <th class="col-uds">UDS<br /><br />(Sq.Ft.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>
+              Flat No. &ndash; <%= plotDetails.plot_no %> (<sup
+                ><%= plotDetails.floor_no %>rd</sup
+              >
+              Floor)
+            </td>
+            <td>
+              <%= plotDetails.super_built_up_area || plotDetails.total_area %>
+            </td>
+            <td><%= plotDetails.uds %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

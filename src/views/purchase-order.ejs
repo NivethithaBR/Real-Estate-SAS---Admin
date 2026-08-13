@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Purchase Order - <%= po.voucherNo %>
+    </title>
+
+    <style>
+
+    /* =====================================================
+       GLOBAL
+    ===================================================== */
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+
+        width: 100%;
+        max-width: 100%;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9px;
+
+        color: #000;
+
+        overflow-x: hidden;
+    }
+
+
+    /* =====================================================
+       A4 PAGE
+    ===================================================== */
+
+    @page {
+        size: A4;
+
+        /*
+         * Same margin on all four sides.
+         */
+        margin: 10mm;
+    }
+
+
+    body {
+        width: 100%;
+        max-width: 100%;
+
+        margin: 0;
+        padding: 0;
+    }
+
+
+    /* =====================================================
+       COMMON TABLE
+    ===================================================== */
+
+    table {
+        margin: 0;
+        padding: 0;
+
+        border-collapse: collapse;
+        border-spacing: 0;
+
+        table-layout: fixed;
+
+        max-width: 100%;
+    }
+
+
+    td,
+    th {
+        box-sizing: border-box;
+
+        min-width: 0;
+
+        border: 1px solid #000;
+
+        padding: 4px;
+
+        vertical-align: top;
+
+        /*
+         * Prevent long text from increasing table width.
+         */
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    /* =====================================================
+       DOCUMENT MAIN WIDTH
+       
+       ALL MAIN TABLES USE THE SAME WIDTH.
+       
+       This makes:
+       
+       Header table
+       Product table
+       Totals table
+       Footer table
+       
+       all have exactly the same left/right edge.
+    ===================================================== */
+
+    .top-table,
+    .items-table,
+    .totals-table,
+    .footer-table {
+        width: 99.5%;
+        max-width: 99.5%;
+    }
+
+
+    /* =====================================================
+       MAIN TITLE
+    ===================================================== */
+
+    .title {
+        width: 99.5%;
+
+        text-align: center;
+
+        font-size: 12px;
+
+        font-weight: bold;
+
+        color: red;
+
+        padding: 4px;
+
+        margin: 0;
+    }
+
+
+    /* =====================================================
+       TOP INFORMATION TABLE
+    ===================================================== */
+
+    .top-table {
+        margin: 0;
+
+        border-collapse: collapse;
+        border-spacing: 0;
+
+        table-layout: fixed;
+
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+
+        /*
+         * Do not allow this table to grow outside
+         * the printable area.
+         */
+        overflow: hidden;
+    }
+
+
+    .top-table td,
+    .top-table th {
+        box-sizing: border-box;
+
+        min-width: 0;
+
+        border: 1px solid #000;
+
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    .invoice-section {
+        width: 55%;
+    }
+
+
+    .po-info-section {
+        width: 45%;
+    }
+
+
+    .section-title {
+        font-weight: bold;
+
+        margin-bottom: 3px;
+    }
+
+
+    .company-name {
+        font-weight: bold;
+
+        margin-bottom: 2px;
+    }
+
+
+    .address {
+        line-height: 1.35;
+
+        white-space: pre-line;
+
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    .label {
+        font-weight: bold;
+    }
+
+
+    .value {
+        font-weight: normal;
+    }
+
+
+    .credit {
+        color: red;
+
+        font-weight: bold;
+    }
+
+
+    .center {
+        text-align: center;
+    }
+
+
+    .middle {
+        vertical-align: middle;
+    }
+
+
+    /* =====================================================
+       ITEM TABLE
+    ===================================================== */
+
+    .items-table {
+        margin: 0;
+
+        border-collapse: collapse;
+        border-spacing: 0;
+
+        table-layout: fixed;
+
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+
+        /*
+         * Allow this table to flow naturally across
+         * multiple PDF pages.
+         */
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+
+    /* =====================================================
+       REPEAT ITEM HEADER ON EVERY PAGE
+    ===================================================== */
+
+    .items-table thead {
+        display: table-header-group;
+    }
+
+
+    /* =====================================================
+       ITEM TABLE BODY
+    ===================================================== */
+
+    .items-table tbody {
+        display: table-row-group;
+
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+
+    .items-table tfoot {
+        display: table-row-group;
+    }
+
+
+    /* =====================================================
+       ITEM TABLE CELLS
+    ===================================================== */
+
+    .items-table th,
+    .items-table td {
+        box-sizing: border-box;
+
+        min-width: 0;
+
+        border: 1px solid #000;
+
+        padding: 4px;
+
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    .items-table th {
+        text-align: center;
+
+        font-weight: bold;
+
+        vertical-align: middle;
+
+        height: 24px;
+
+        padding: 4px;
+    }
+
+
+    .items-table td {
+        vertical-align: middle;
+
+        padding: 4px;
+    }
+
+
+    /* =====================================================
+       ITEM COLUMN WIDTHS
+    ===================================================== */
+
+    .slno {
+        width: 7%;
+
+        text-align: center;
+    }
+
+
+    .description {
+        width: 41%;
+
+        text-align: left;
+    }
+
+
+    .unit {
+        width: 10%;
+
+        text-align: center;
+    }
+
+
+    .qty {
+        width: 11%;
+
+        text-align: center;
+    }
+
+
+    .price {
+        width: 15%;
+
+        text-align: right;
+
+        white-space: normal;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .amount {
+        width: 16%;
+
+        text-align: right;
+
+        white-space: normal;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    /* =====================================================
+       ITEM ROW
+    ===================================================== */
+
+    .item-row {
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+    }
+
+
+    /* =====================================================
+       ITEM DESCRIPTION
+    ===================================================== */
+
+    .item-description {
+        white-space: normal;
+
+        word-wrap: break-word;
+
+        overflow-wrap: anywhere;
+
+        line-height: 1.3;
+
+        min-width: 0;
+    }
+
+
+    .main-item-description {
+        font-weight: bold;
+
+        text-align: center;
+
+        line-height: 1.3;
+    }
+
+
+    /* =====================================================
+       SUB ITEMS
+    ===================================================== */
+
+    .sub-item {
+        padding-left: 12px;
+
+        line-height: 1.3;
+
+        white-space: normal;
+
+        word-wrap: break-word;
+
+        overflow-wrap: anywhere;
+
+        min-width: 0;
+    }
+
+
+    .sub-item-label {
+        display: inline-block;
+
+        width: 15px;
+
+        font-weight: bold;
+    }
+
+
+    /* =====================================================
+       RUPEE
+    ===================================================== */
+
+    .rupee {
+        white-space: nowrap;
+    }
+
+
+    /* =====================================================
+       TOTALS TABLE
+    ===================================================== */
+
+    .totals-table {
+        margin-top: -1px;
+
+        border-collapse: collapse;
+        border-spacing: 0;
+
+        table-layout: fixed;
+
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+
+    .totals-table td {
+        box-sizing: border-box;
+
+        min-width: 0;
+
+        border: 1px solid #000;
+
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    .totals-label {
+        text-align: right;
+
+        font-weight: bold;
+    }
+
+
+    .totals-value {
+        text-align: right;
+
+        font-weight: bold;
+
+        white-space: normal;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .grand-total td {
+        font-weight: bold;
+
+        font-size: 9px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    .footer-table {
+        margin-top: 0;
+
+        border-collapse: collapse;
+        border-spacing: 0;
+
+        table-layout: fixed;
+
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+
+    .footer-table td {
+        box-sizing: border-box;
+
+        min-width: 0;
+
+        border: 1px solid #000;
+
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+    }
+
+
+    .amount-words {
+        width: 50%;
+
+        font-weight: bold;
+
+        text-transform: uppercase;
+
+        line-height: 1.3;
+    }
+
+
+    .for-company {
+        width: 30%;
+
+        font-weight: bold;
+
+        text-align: center;
+
+        vertical-align: top;
+    }
+
+
+    .signature {
+        width: 20%;
+
+        text-align: center;
+
+        font-weight: bold;
+
+        vertical-align: bottom;
+    }
+
+
+    /* =====================================================
+       PRINT / PUPPETEER
+    ===================================================== */
+
+    @media print {
+
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+
+            margin: 0;
+            padding: 0;
+
+            overflow-x: hidden;
+        }
+
+
+        /*
+         * Repeat product table header on every page.
+         */
+        .items-table thead {
+            display: table-header-group;
+        }
+
+
+        /*
+         * Keep individual product rows together.
+         */
+        .item-row {
+            page-break-inside: avoid;
+
+            break-inside: avoid;
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT use:
+         *
+         * tr {
+         *     page-break-inside: avoid;
+         * }
+         *
+         * because it can interfere with automatic
+         * table pagination.
+         */
+
+    }
+
+</style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         PURCHASE ORDER HEADER
+    ====================================================== -->
+
+    <table class="top-table">
+
+        <!-- TITLE -->
+        <tr>
+            <td colspan="2" class="title">
+                PURCHASE ORDER
+            </td>
+        </tr>
+
+        <!-- INVOICE TO + PO INFO -->
+        <tr>
+
+            <!-- LEFT -->
+            <td class="invoice-section">
+
+                <div class="section-title">
+                    Invoice To
+                </div>
+
+                <div class="company-name">
+                    <%= po.invoiceTo.name %>
+                </div>
+
+                <div class="address">
+                    <%= po.invoiceTo.address %>
+                </div>
+
+                <div>
+                    GSTIN/UIN:
+                    <%= po.invoiceTo.gstin %>
+                </div>
+
+                <div>
+                    State Name :
+                    <%= po.invoiceTo.stateName %>,
+                        Code :
+                        <%= po.invoiceTo.stateCode %>
+                </div>
+
+            </td>
+
+
+            <!-- RIGHT -->
+            <td class="po-info-section">
+
+                <table style="border:0;">
+
+                    <tr>
+                        <td style="width:50%;">
+                            <span class="label">
+                                Voucher No.
+                            </span>
+                            <br>
+
+                            <%= po.voucherNo %>
+                        </td>
+
+                        <td style="width:50%;">
+                            <span class="label">
+                                Dated
+                            </span>
+                            <br>
+
+                            <%= po.date %>
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td colspan="2">
+
+                            <span class="label">
+                                Mode/Terms of Payment
+                            </span>
+
+                            <br>
+
+                            <span class="credit">
+                                <%= po.paymentTerms %>
+                            </span>
+
+                        </td>
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+
+                            <span class="label">
+                                Reference No. & Date.
+                            </span>
+
+                            <br>
+
+                            <%= po.referenceNo %>
+
+                        </td>
+
+                        <td>
+
+                            <span class="label">
+                                Other References
+                            </span>
+
+                            <br>
+
+                            <%= po.otherReferences || "" %>
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </td>
+
+        </tr>
+
+
+        <!-- CONSIGNEE -->
+        <tr>
+
+            <td>
+
+                <div class="section-title">
+                    Consignee (Ship to)
+                </div>
+
+                <div class="company-name">
+                    <%= po.consignee.name %>
+                </div>
+
+                <div class="address">
+                    <%= po.consignee.address %>
+                </div>
+
+                <div>
+                    MOB NO.
+                    <%= po.consignee.mobile %>
+                </div>
+
+                <div>
+                    GSTIN/UIN:
+                    <%= po.consignee.gstin %>
+                </div>
+
+                <div>
+                    State Name :
+                    <%= po.consignee.stateName %>,
+                        Code :
+                        <%= po.consignee.stateCode %>
+                </div>
+
+            </td>
+
+
+            <td>
+
+                <table style="border:0;">
+
+                    <tr>
+
+                        <td style="width:50%;">
+
+                            <span class="label">
+                                Dispatched through
+                            </span>
+
+                            <br><br>
+
+                            <strong>
+                                <%= po.dispatchThrough %>
+                            </strong>
+
+                        </td>
+
+
+                        <td style="width:50%;">
+
+                            <span class="label">
+                                Destination
+                            </span>
+
+                            <br><br>
+
+                            <strong>
+                                <%= po.destination %>
+                            </strong>
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </td>
+
+        </tr>
+
+
+        <!-- SUPPLIER -->
+        <tr>
+
+            <td>
+
+                <div class="section-title">
+                    Supplier (Bill from)
+                </div>
+
+                <div class="company-name">
+                    <%= po.supplier.name %>
+                </div>
+
+                <div class="address">
+                    <%= po.supplier.address %>
+                </div>
+
+                <div>
+                    Email id :
+                    <%= po.supplier.email %>
+                </div>
+
+                <div>
+                    MOB NO. :
+                    <%= po.supplier.mobile %>
+                </div>
+
+                <div>
+                    GSTIN :
+                    <%= po.supplier.gstin %>
+                </div>
+
+                <div>
+                    State Name :
+                    <%= po.supplier.stateName %>,
+                        Code :
+                        <%= po.supplier.stateCode %>
+                </div>
+
+            </td>
+
+            <td>
+                &nbsp;
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    <!-- =====================================================
+         ITEMS TABLE
+    ====================================================== -->
+
+    <table class="items-table">
+
+        <thead>
+
+            <tr>
+
+                <th class="slno">
+                    Sl. No.
+                </th>
+
+                <th class="description">
+                    DESCRIPTION
+                </th>
+
+                <th class="unit">
+                    UNIT
+                </th>
+
+                <th class="qty">
+                    QTY
+                </th>
+
+                <th class="price">
+                    OFFER PRICE
+                </th>
+
+                <th class="amount">
+                    AMOUNT
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            <% po.items.forEach(function(item, index) { %>
+
+                <!-- =====================================
+                     MAIN ITEM
+                ====================================== -->
+
+                <tr class="item-row">
+
+                    <td class="slno">
+                        <%= item.slNo %>
+                    </td>
+
+
+                    <td class="description">
+
+                        <div class="item-description main-item-description">
+
+                            <%= item.description %>
+
+                        </div>
+
+
+                        <% if (item.details && item.details.length) { %>
+
+                            <% item.details.forEach(function(detail, detailIndex) { %>
+
+                                <div class="item-description sub-item">
+
+                                    <span class="sub-item-label">
+                                        <%= String.fromCharCode(97 + detailIndex) %>
+                                    </span>
+
+                                    <%= detail %>
+
+                                </div>
+
+                                <% }) %>
+
+                                    <% } %>
+
+                    </td>
+
+
+                    <td class="unit">
+
+                        <%= item.unit || "" %>
+
+                    </td>
+
+
+                    <td class="qty">
+
+                        <%= item.quantity ? Number(item.quantity).toFixed(2) : "" %>
+
+                    </td>
+
+
+                    <td class="price">
+
+                        <% if (item.offerPrice !==null && item.offerPrice !==undefined) { %>
+
+                            ₹ <%= Number(item.offerPrice).toLocaleString("en-IN", { minimumFractionDigits: 2,
+                                maximumFractionDigits: 2 }) %>
+
+                                <% } %>
+
+                    </td>
+
+
+                    <td class="amount">
+
+                        <% if (item.amount !==null && item.amount !==undefined) { %>
+                            <% let totalAmts = Number(item.amount) * Number(item.quantity) %>
+                            ₹ <%= Number(totalAmts).toLocaleString("en-IN", { minimumFractionDigits: 2,
+                                maximumFractionDigits: 2 }) %>
+
+                                <% } %>
+
+                    </td>
+
+                </tr>
+
+
+                <% }) %>
+
+        </tbody>
+
+    </table>
+
+
+    <!-- =====================================================
+         TOTALS
+    ====================================================== -->
+
+    <table class="totals-table">
+
+        <tr>
+
+            <td colspan="4">
+                &nbsp;
+            </td>
+
+            <td class="totals-label">
+                SUB TOTAL
+            </td>
+
+            <td class="totals-value">
+
+                ₹ <%= Number(po.subTotal).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2
+                    }) %>
+
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td colspan="4">
+                &nbsp;
+            </td>
+
+            <td class="totals-label">
+                GST <%= po.gstRate %>%
+            </td>
+
+            <td class="totals-value">
+
+                ₹ <%= Number(po.gstAmount).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2
+                    }) %>
+
+            </td>
+
+        </tr>
+
+
+        <tr class="grand-total">
+
+            <td colspan="4">
+                &nbsp;
+            </td>
+
+            <td class="totals-label">
+                GRAND TOTAL
+            </td>
+
+            <td class="totals-value">
+
+                ₹ <%= Number(po.grandTotal).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2
+                    }) %>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <table class="footer-table">
+
+        <tr>
+
+            <td class="amount-words">
+
+                Amount Chargeable (in words)
+
+                <br><br>
+
+                Indian Rupees:
+                <%= po.amountInWords %>
+                    ONLY
+
+            </td>
+
+
+            <td class="for-company">
+
+                for
+                <%= po.invoiceTo.name %>
+
+            </td>
+
+
+            <td class="signature">
+
+                <br><br><br>
+
+                Authorised Signatory
+
+            </td>
+
+        </tr>
+
+    </table>
+
+</body>
+
+</html>

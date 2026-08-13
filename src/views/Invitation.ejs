@@ -1,0 +1,95 @@
+
+<!-- Header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizinoa Realestate</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 0;">
+    <tr>
+        <td align="center">
+
+            <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.08);">
+
+                <tr>
+                    <td style="background:#0f172a;padding:25px;text-align:center;">
+                        <h1 style="margin:0;color:#ffffff;font-size:28px;">
+                            Wizinoa Realestate
+                        </h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:40px;">
+
+<!-- Main.ejs -->
+
+<h2 style="margin-top:0;color:#1e293b;">
+    Welcome <%= full_name %> 👋
+</h2>
+
+<p style="font-size:16px;color:#555;">
+    Your account has been created successfully.
+</p>
+
+<table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;margin:25px 0;border:1px solid #e5e7eb;">
+    <tr style="background:#f8fafc;">
+        <td style="font-weight:bold;width:150px;">Email</td>
+        <td><%= email %></td>
+    </tr>
+
+    <tr>
+        <td style="font-weight:bold;">Password</td>
+        <td><%= password %></td>
+    </tr>
+</table>
+
+<div style="text-align:center;margin:35px 0;">
+    <a href="<%= loginUrl %>"
+        style="background:#2563eb;
+        color:#ffffff;
+        text-decoration:none;
+        padding:14px 35px;
+        border-radius:6px;
+        display:inline-block;
+        font-weight:bold;
+        font-size:16px;">
+        Login Now
+    </a>
+</div>
+
+<p style="font-size:14px;color:#777;line-height:22px;">
+    Please keep your login credentials secure and do not share them with anyone.
+</p>
+
+
+
+<!-- Footer.ejs -->
+
+                </td>
+            </tr>
+
+                <tr>
+                    <td style="background:#f8fafc;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">
+                        <p style="margin:0;font-size:15px;color:#555;">
+                            Thank you ❤️
+                        </p>
+
+                        <p style="margin-top:8px;font-size:13px;color:#888;">
+                            © <%= new Date().getFullYear() %> Wizinoa Realestate.
+                            All Rights Reserved.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
+
