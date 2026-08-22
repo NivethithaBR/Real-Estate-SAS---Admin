@@ -11,6 +11,7 @@ const {
   deletePlotImages,
   getAllPlotsBySiteId,
   exportPlotAtPdf,
+  getLandPlot
 } = require("../controllers/plotController");
 const upload = require("../middlewares/uploadMiddleware");
 
@@ -100,5 +101,5 @@ router.get("/exportaspdf/:id", exportPlotDetailsAsPDF);
 router.get("/exportallotmentletter/:id", exportPlotAtPdf); // router.get("/pdf/exportall", exportAllPlotAsPDF);
 router.get("/available-plot-per-site", getAvailablePlotsPerSite);
 router.get("/getAllPlotsBySiteId/:id", getAllPlotsBySiteId);
-
+router.get("/get-land-plot/:id", getLandPlot)
 module.exports = router;

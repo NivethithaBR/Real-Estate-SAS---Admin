@@ -37,8 +37,8 @@ const purchaseRouter = require("./routes/purchaseRouter");
 const supplierRouter = require("./routes/supplierRoutes");
 const stageRouter = require("./routes/stageRoutes");
 const estimateRouter = require("./routes/estimateRouter")
-
-
+const landRoutes = require("./routes/landRoutes")
+const multer = require("multer");
 
 
 const { createServer } = require("http");
@@ -147,9 +147,10 @@ app.use("/api/plot", plotRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/enquiries", enquiryRoutes);
-app.use("/webhookmeta", webhookRoute);
-        
 
+app.use("/api/land",landRoutes)
+
+app.use("/webhookmeta", webhookRoute);       
 app.use("/metaonboard", metaonboardRoute);
 
 
@@ -205,6 +206,18 @@ app.use("/api/stage", stageRouter);
 
 app.use("/api/estimate", estimateRouter);
 
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({
+        success: false,
+        message: `File too large. Max allowed size is ${maxSize / (1024 * 1024)}MB.`,
+      });
+    }
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next(err);
+});
 
 
 // app.use(globalError);
