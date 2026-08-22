@@ -7,6 +7,7 @@ const path = require("path");
 const ejs = require("ejs");
 const { Types, default: mongoose } = require("mongoose");
 const ErrorHandler = require("../utils/ErrorHandler");
+const Landplot = require("../models/Landplot")
 
 exports.addNewPlot = async (req, res, next) => {
   try {
@@ -320,7 +321,7 @@ exports.updatePlotById = async (req, res, next) => {
       }
       plot.plot_no = plot_no;
     }
-
+    console.log("Came Here",id)
     if (flat_no) plot.flat_no = flat_no;
     if (block) plot.block = block;
     if (tower_name) plot.tower_name = tower_name;
@@ -367,10 +368,13 @@ exports.updatePlotById = async (req, res, next) => {
         "plot_cover_images",
       );
     }else{
-      return res.status(200).json({
+      if(!plot.cover_image){
+        return res.status(400).json({
         succes : false,
         message : "Cover image is required"
       })
+      }
+      
     }
 
     if (files["images"]) {
@@ -743,3 +747,61 @@ exports.exportPlotAtPdf = async (req, res, next) => {
       .json({ success: false, message: "Error exporting Allotment Letter" });
   }
 };
+
+exports.getLandPlot = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const plot = await Landplot.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "site_id",
+          foreignField: "_id",
+          as: "site",
+        },
+      },
+      {
+        $unwind: {
+          path: "$site",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "bookedlands",
+          localField: "client_id",
+          foreignField: "_id",
+          as: "booked_client",
+        },
+      },
+      {
+        $lookup: {
+          from: "boughtlands",
+          localField: "client_id",
+          foreignField: "_id",
+          as: "bought_client",
+        },
+      },
+      {
+        $addFields: {
+          client: { $concatArrays: ["$booked_client", "$bought_client"] },
+        },
+      },
+      {
+        $unwind: {
+          path: "$client",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (!plot.length) {
+      return res.status(404).json({ success: false, message: "Land plot not Found" });
+    }
+    res.status(200).json({ success: true, message: "Land plot retrieve successfully", plot: plot[0] });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "Error retrieving plot", err });
+  }
+};
+

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 4 },
     gender: { type: String, enum: ["male", "female"], required: true },
     address: { type: String, required: true },
-    role: { type: String, enum: ["Super Admin", "Admin", "User","HR"], required: true },
+    role: { type: String, enum: ["Admin", "User"], required: true },
     is_otp_verified: { type: Boolean, default: false },
     permission_for_plots: [Number],
     profileImage: {
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    department : {type : String, required : true},
+    department : {type : String},
     daffytelToken: String,
   },
   { timestamps: true }

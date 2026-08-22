@@ -284,60 +284,7 @@ exports.deleteSiteImage = async (req, res) => {
   }
 };
 
-// const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// exports.whatsAppMessage = async (req, res) => {
-//   try {
-//     console.log("object");
-//     const {
-//       to,
-//       organizerName,
-//       date,
-//       place,
-//       functionType,
-//       fname,
-//       lname,
-//       number,
-//       paymentType,
-//       address,
-//       total,
-//       pdfUrl = "https://res.cloudinary.com/dt30jyjkv/image/upload/v1745481108/RC3_piorz9.png",
-//     } = req.body;
-
-//     if (!to || !pdfUrl) {
-//       return res.status(400).send('Missing "to", "body", or "pdfUrl".');
-//     }
-
-//     const bodyText = `Organizer Name: ${organizerName || ""}
-// Date: ${date || ""}
-// Place: ${place || ""}
-// Function Type: ${functionType || ""}
-// First Name: ${fname || ""}
-// Last Name: ${lname || ""}
-// Number: ${number || ""}
-// Payment Type: ${paymentType || ""}
-// Address: ${address || ""}
-// Total: ${total || ""}
-
-// Visit Our Site: https://www.wizinoa.com/
-
-// Thank You!`;
-
-//     const decoded = Buffer.from("ODIyMDk0MjM4NA==", "base64").toString("utf-8"); // "8220942384"
-
-//     const message = await client.messages.create({
-//       from: `whatsapp:${+14155238886}`,
-//       to: `whatsapp:${to}`, // e.g., 'whatsapp:+919999999999'
-//       body: bodyText,
-//       mediaUrl: [pdfUrl], // must be a public link to the PDF
-//     });
-
-//     res.status(200).send(`Message sent: ${message.sid}`);
-//   } catch (error) {
-//     console.error("Error sending WhatsApp message:", error);
-//     res.status(500).send("Failed to send WhatsApp message.");
-//   }
-// };
 exports.uploadSiteMapAndCountsPDF = async (req, res, next) => {
   try {
     const { id } = req.params;
