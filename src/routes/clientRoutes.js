@@ -8,9 +8,11 @@ const {
   getFilteredBoughtPlots,
   getFilteredBookedClients,
   searchBooked,
+  searchBookedLand,
   searchBougths,
   searchBougthsland,
   getBookedOne,
+  getBookedOneland,
   getBoughtOne,
   getClientById,
   getlandClientById,
@@ -52,6 +54,7 @@ router.get("/getclientby/:id", getClientById);
 router.get("/getlandclientby/:id", getlandClientById);
 
 router.get("/searchBooked", searchBooked);
+router.get("/searchBookedLand", searchBookedLand);
 router.get("/searchBoughts", searchBougths);
 router.get("/searchBoughtsland", searchBougthsland);
 
@@ -68,6 +71,8 @@ router.post(
   bookPlot
 );
 router.get("/get-bookedone/:id", getBookedOne);
+router.get("/get-bookedoneland/:id", getBookedOneland);
+
 
 // router.put(
 //   "/update-booking/:plot_id",
