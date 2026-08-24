@@ -22,7 +22,6 @@ const EnquirySchema = new mongoose.Schema({
     },
     lead_source : {
         type : String,
-        required : true
     },
     whatsappnumber : {
         type : String,

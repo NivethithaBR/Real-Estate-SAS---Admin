@@ -837,6 +837,101 @@ exports.searchBooked = async (req, res) => {
   }
 };
 
+exports.searchBookedLand = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, site_id, plot_id, status } = req.query;
+    let skip = (Number(page) - 1) * Number(limit);
+    const parsedStatus = JSON.parse(status);
+
+    const matchStage = {
+      $expr: {
+        $and: [],
+      },
+    };
+    if (parsedStatus?.length > 0) {
+      matchStage.$expr.$and.push({
+        $in: ["$installment_status", parsedStatus],
+      });
+    }
+
+    if (site_id) {
+      matchStage.$expr.$and.push({
+        $eq: ["$site_id", new Types.ObjectId(site_id)],
+      });
+    }
+
+    if (plot_id) {
+      matchStage.$expr.$and.push({
+        $eq: ["$plot_id", new Types.ObjectId(plot_id)],
+      });
+    }
+    const filteredBookeds = await Bookedland.aggregate([
+      {
+        $facet: {
+          count: [
+            {
+              $count: "totalCounts",
+            },
+          ],
+          data: [
+            {
+              $match: matchStage,
+            },
+            {
+              $lookup: {
+                from: "lands",
+                localField: "site_id",
+                foreignField: "_id",
+                as: "site",
+              },
+            },
+            {
+              $lookup: {
+                from: "landplots",
+                localField: "plot_id",
+                foreignField: "_id",
+                as: "plot",
+              },
+            },
+            {
+              $unwind: {
+                path: "$site",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $unwind: {
+                path: "$plot",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $skip: skip,
+            },
+            {
+              $limit: Number(limit),
+            },
+          ],
+        },
+      },
+    ]);
+    const totalCount = filteredBookeds?.[0]?.count?.[0]?.totalCounts || 0;
+    const data = filteredBookeds?.[0]?.data || [];
+
+    res.status(200).json({
+      success: true,
+      message: "Filtered Booked Plots Fetch Successfully",
+      totalCount,
+      filteredBookeds,
+      filteredCount: data.length,
+      data,
+    });
+  } catch (err) {
+    console.error("Error fetching booked plots:", err);
+    res.status(500).json({ success: false, message: "Error fetching booked plots", err });
+  }
+};
+
 exports.getBookedOne = async (req, res) => {
   try {
     const { id } = req.params;
@@ -869,6 +964,75 @@ exports.getBookedOne = async (req, res) => {
       {
         $lookup: {
           from: "bookings",
+          localField: "booking_id",
+          foreignField: "_id",
+          as: "booking_id",
+        },
+      },
+      {
+        $unwind: {
+          path: "$booking_id",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$site",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+
+    const followups = await followup_model.find({
+      refId: id,
+      refType: "Booked"
+    });
+
+    if (!client.length) {
+      return res.status(400).json({ success: false, message: " Booked Client Not Found" });
+    }
+    res.status(200).json({
+      success: true,
+      messge: "Get Booked Client Details Fetch Successfully",
+      data: { ...client[0], followups },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error Getting Booked by ID", err });
+  }
+};
+
+exports.getBookedOneland = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await Bookedland.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "landplots",
+          localField: "plot_id",
+          foreignField: "_id",
+          as: "plot",
+        },
+      },
+      {
+        $unwind: {
+          path: "$plot",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "site_id",
+          foreignField: "_id",
+          as: "site",
+        },
+      },
+      {
+        $lookup: {
+          from: "bookinglands",
           localField: "booking_id",
           foreignField: "_id",
           as: "booking_id",
