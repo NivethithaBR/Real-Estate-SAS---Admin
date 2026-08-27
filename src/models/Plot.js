@@ -117,6 +117,7 @@ const plotSchema = new mongoose.Schema(
     },
     direct_price: {
       type: Number,
+      default : 0
     },
     mrp: {
       type: Number,
