@@ -269,6 +269,71 @@ exports.getPlotById = async (req, res) => {
   }
 };
 
+exports.getlandPlotById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const plot = await Landplot.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "site_id",
+          foreignField: "_id",
+          as: "site",
+        },
+      },
+      {
+        $unwind: {
+          path: "$site",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "bookedlandss",
+          localField: "client_id",
+          foreignField: "_id",
+          as: "booked_client",
+        },
+      },
+      {
+        $lookup: {
+          from: "boughtlands",
+          localField: "client_id",
+          foreignField: "_id",
+          as: "bought_client",
+        },
+      },
+      {
+        $addFields: {
+          client: { $concatArrays: ["$booked_client", "$bought_client"] },
+        },
+      },
+      {
+        $unwind: {
+          path: "$client",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (!plot.length) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Flat not Found" });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Plots retrieved successfully",
+      plot: plot[0],
+    });
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ success: false, message: "Error retrieving flat", err });
+  }
+};
+
 exports.updatePlotById = async (req, res, next) => {
   try {
     const { id } = req.params;

@@ -3,6 +3,7 @@ const {
   addNewPlot,
   getAllPlots,
   getPlotById,
+  getlandPlotById,
   deletePlot,
   updatePlotById,
   exportAllPlotAsPDF,
@@ -57,6 +58,7 @@ router.post(
 );
 router.get("/getallplots", getAllPlots);
 router.get("/get-plot/:id", getPlotById);
+router.get("/getland-plot/:id", getlandPlotById);
 router.put(
   "/update-plot/:id",
   upload.fields([
