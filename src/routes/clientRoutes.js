@@ -14,6 +14,7 @@ const {
   getBookedOne,
   getBookedOneland,
   getBoughtOne,
+  getBoughtOneLand,
   getClientById,
   getlandClientById,
   updateAmount,
@@ -86,6 +87,8 @@ router.get("/get-bookedoneland/:id", getBookedOneland);
 //   updateBookPlot
 // );
 router.get("/get-boughtone/:id", getBoughtOne);
+router.get("/get-boughtoneland/:id", getBoughtOneLand);
+
 
 router.get("/bought-filter", getFilteredBoughtPlots);
 router.get("/booked-filter", getFilteredBookedClients);

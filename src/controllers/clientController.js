@@ -185,6 +185,7 @@ exports.updateClient = async (req, res, next) => {
     }
 
     if (payment_mode !== "Full Payment") {
+      console.log("payment mode came")
       await Booked.findByIdAndUpdate(clientObjectId, data, { new: true });
       client = await Booked.findById(clientObjectId);
 
@@ -192,9 +193,12 @@ exports.updateClient = async (req, res, next) => {
         client.booking_id = booking._id;
       }
       if (payment_mode === "EMI" && installment_status === "EMI") {
+        console.log("payment mode came emi")
         client.emi_details.push({ amount: received_amount, date: Date.now(), payment_type });
+        console.log("payment mode came emidone")
       }
       if (payment_mode === "Installment" && status.includes(installment_status)) {
+        console.log("came here always")
         client.installment_details.push({
           status: installment_status,
           amount: received_amount,
@@ -203,69 +207,124 @@ exports.updateClient = async (req, res, next) => {
         });
       }
       await client.save();
+      // console.log("came here always save",installment_status, status)
+
+    }
+    if (payment_mode === "Full Payment" && installment_status !== "Fully Paid") {
+      foundClient.set({
+        ...req.body,
+        payment_mode: "Full Payment",
+        overAllGivenAmount: received_amount,
+        full_payment_type: payment_type,
+      });
+      await foundClient.save();
+    }
+    if (payment_mode === "Full Payment" && installment_status === "Fully Paid") {
+      res.status(400).json({
+        success: false,
+        message: "Try making payment in instalments",
+      });
+    }
+    console.log(installment_status, registration_cost, registration_date, registered_by, "tryhere")
+    if (installment_status === "Fully Paid" && (!registration_cost || !registration_date || !registered_by)) {
+      if (!registration_cost) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registration cost"
+        })
+      }
+      if (!registration_date) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registration date"
+        })
+      }
+      if (!registered_by) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registered By"
+        })
+      }
     }
     if (installment_status === "Fully Paid" && registration_cost && registration_date && registered_by) {
       let percentages;
       let commissionPRCG = 13;
       let mrp = foundPlot?.mrp;
 
-      if (foundClient?.isMrpModified) {
-        percentages = foundClient.professionalsPercentages;
-        commissionPRCG = foundClient.commissionPercentage;
-        mrp = foundClient?.modified_mrp;
-      } else {
-        percentages = professionals;
-      }
-      console.log("isMRPmodified", foundClient.isMrpModified);
-      console.log("mrp", mrp);
-      console.log(percentages);
-      console.log("typeof", typeof percentages?.[0]?.percentage);
+      // if (foundClient?.isMrpModified) {
+      //   percentages = foundClient.professionalsPercentages;
+      //   commissionPRCG = foundClient.commissionPercentage;
+      //   mrp = foundClient?.modified_mrp;
+      // } else {
+      //   percentages = professionals;
+      // }
+      // console.log("isMRPmodified", foundClient.isMrpModified);
+      // console.log("mrp", mrp);
+      // console.log(percentages);
+      // console.log("typeof", typeof percentages?.[0]?.percentage);
 
-      const modified = percentages?.map((data) => {
-        let amount = (Number(mrp) / 100) * Number(data?.percentage);
-        return { ...data, amount };
-      });
-      console.log("modified", modified);
+      // const modified = percentages?.map((data) => {
+      //   let amount = (Number(mrp) / 100) * Number(data?.percentage);
+      //   return { ...data, amount };
+      // });
+      // console.log("modified", modified);
 
-      const index = percentages?.findIndex((value) => value?.type === foundClient?.professional);
-      console.log("index", index);
+      // const index = percentages?.findIndex((value) => value?.type === foundClient?.professional);
+      // console.log("index", index);
 
-      const firstFiltered = modified?.slice(0, index + 1);
-      const remaings = modified?.slice(index + 1);
+      // const firstFiltered = modified?.slice(0, index + 1);
+      // const remaings = modified?.slice(index + 1);
 
-      const professionals_key = [
-        "golden_director",
-        "senior_director",
-        "director",
-        "branch_manager",
-        "manager",
-        "assistant_manager",
-        "telecalling",
-      ];
-      console.log("firstFiltered", firstFiltered);
-      console.log("remaings", remaings);
+      // const professionals_key = [
+      //   "golden_director",
+      //   "senior_director",
+      //   "director",
+      //   "branch_manager",
+      //   "manager",
+      //   "assistant_manager",
+      //   "telecalling",
+      // ];
+      // console.log("firstFiltered", firstFiltered);
+      // console.log("remaings", remaings);
 
-      const result = firstFiltered
-        .reduceRight((acc, value) => {
-          if (acc.length === 0) {
-            acc.push({ ...value, amt: value.amount });
-          } else {
-            const prev = acc[acc.length - 1];
-            const amt = value.amount - prev.amount;
-            console.log(amt);
-            acc.push({ ...value, amt: amt });
-          }
-          return acc;
-        }, [])
-        .reverse();
+      // const result = firstFiltered
+      //   .reduceRight((acc, value) => {
+      //     if (acc.length === 0) {
+      //       acc.push({ ...value, amt: value.amount });
+      //     } else {
+      //       const prev = acc[acc.length - 1];
+      //       const amt = value.amount - prev.amount;
+      //       console.log(amt);
+      //       acc.push({ ...value, amt: amt });
+      //     }
+      //     return acc;
+      //   }, [])
+      //   .reverse();
 
-      console.log("result", result);
+      // console.log("result", result);
 
-      const remaingsWithZero = remaings?.map((remain) => ({ ...remain, amt: 0 }));
+      // const remaingsWithZero = remaings?.map((remain) => ({ ...remain, amt: 0 }));
 
-      const finalResult = result
-        .concat(remaingsWithZero)
-        .map((data, index) => ({ ...data, name: founTeam[professionals_key[index]] }));
+      // const finalResult = result
+      //   .concat(remaingsWithZero)
+      //   .map((data, index) => ({ ...data, name: founTeam[professionals_key[index]] }));
+      // client = await Booked.findById(clientObjectId);
+
+      // if (payment_mode === "EMI") {
+      //   console.log("payment mode came emi")
+      //   client.emi_details.push({ amount: received_amount, date: Date.now(), payment_type });
+      //   console.log("payment mode came emidone")
+      // }
+      // if (payment_mode === "Installment") {
+      //   console.log("came here always")
+      //   client.installment_details.push({
+      //     status: installment_status,
+      //     amount: received_amount,
+      //     date: Date.now(),
+      //     payment_type,
+      //   });
+      // }
+      // await client.save()
 
       const newRegistration = await Registration.create({
         client_name: req.body.client_name,
@@ -281,35 +340,58 @@ exports.updateClient = async (req, res, next) => {
       const commission_amount = (Number(foundClient?.overAllGivenAmount) / 100) * Number(commissionPRCG);
       let remainingWithCommission = foundClient?.overAllGivenAmount - commission_amount;
       let remainingWithDP = remainingWithCommission - Number(foundPlot?.direct_price);
+      console.log("remainingWithDP1", remainingWithDP, remainingWithCommission, foundPlot?.direct_price);
+
       if (registered_by === "Us") {
         remainingWithDP -= Number(registration_cost);
       }
       console.log("commission_amount", commission_amount);
       console.log("remainingWithDP", remainingWithDP);
 
+      if (payment_mode === "EMI") {
+        console.log("payment mode came emi")
+        foundClient.emi_details.push({ amount: received_amount, date: Date.now(), payment_type });
+        console.log("payment mode came emidone")
+      }
+      if (payment_mode === "Installment") {
+        console.log("came here always")
+        foundClient.installment_details.push({
+          status: installment_status,
+          amount: received_amount,
+          date: Date.now(),
+          payment_type,
+        });
+      }
+      if (payment_mode !== "Full Payment" && installment_status === "Fully Paid") {
+        foundClient.set({
+          ...req.body,
+          overAllGivenAmount: received_amount,
+          full_payment_type: payment_type,
+          pending_amount: Number(foundClient?.pending_amount) - Number(received_amount)
+        });
+      }
+
+
+      // await foundClient.save()
       await Bought.create({
         ...foundClient.toObject(),
         registration_id: newRegistration._id,
         registration_cost,
         registration_date,
         registered_by,
-        commission_distributed: finalResult,
+        // commission_distributed: finalResult,
         commission: commission_amount,
         revenue: remainingWithDP,
       });
       foundPlot.plot_status = "Sold";
+
+
+
+
       foundPlot.save();
       await Booked.findByIdAndDelete(clientObjectId);
     }
-    if (payment_mode === "Full Payment" && installment_status !== "Fully Paid") {
-      foundClient.set({
-        ...req.body,
-        payment_mode: "Full Payment",
-        overAllGivenAmount: received_amount,
-        full_payment_type: payment_type,
-      });
-      await foundClient.save();
-    }
+
 
     res.status(200).json({
       success: true,
@@ -335,7 +417,7 @@ exports.updatelandClient = async (req, res, next) => {
       registered_by,
       payment_type,
     } = req.body;
-    console.log(installment_status,"installment_status")
+    console.log(installment_status, "installment_status")
     const files = req.files;
     const newFiles = {};
     const data = { ...req.body };
@@ -427,68 +509,103 @@ exports.updatelandClient = async (req, res, next) => {
       }
       await client.save();
     }
+    if (payment_mode === "Full Payment" && installment_status !== "Fully Paid") {
+      foundClient.set({
+        ...req.body,
+        payment_mode: "Full Payment",
+        overAllGivenAmount: received_amount,
+        full_payment_type: payment_type,
+      });
+      await foundClient.save();
+    }
+    if (payment_mode === "Full Payment" && installment_status === "Fully Paid") {
+      res.status(400).json({
+        success: false,
+        message: "Try making payment in instalments",
+      });
+    }
+    if (installment_status === "Fully Paid" && (!registration_cost || !registration_date || !registered_by)) {
+      if (!registration_cost) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registration cost"
+        })
+      }
+      if (!registration_date) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registration date"
+        })
+      }
+      if (!registered_by) {
+        return res.status(400).json({
+          success: false,
+          message: "Provide Registered By"
+        })
+      }
+    }
     if (installment_status === "Fully Paid" && registration_cost && registration_date && registered_by) {
       let percentages;
       let commissionPRCG = 13;
       let mrp = foundPlot?.mrp;
 
-      if (foundClient?.isMrpModified) {
-        percentages = foundClient.professionalsPercentages;
-        commissionPRCG = foundClient.commissionPercentage;
-        mrp = foundClient?.modified_mrp;
-      } else {
-        percentages = professionals;
-      }
-      console.log("isMRPmodified", foundClient.isMrpModified);
-      console.log("mrp", mrp);
-      console.log(percentages);
-      console.log("typeof", typeof percentages?.[0]?.percentage);
+      // if (foundClient?.isMrpModified) {
+      //   percentages = foundClient.professionalsPercentages;
+      //   commissionPRCG = foundClient.commissionPercentage;
+      //   mrp = foundClient?.modified_mrp;
+      // } else {
+      //   percentages = professionals;
+      // }
+      // console.log("isMRPmodified", foundClient.isMrpModified);
+      // console.log("mrp", mrp);
+      // console.log(percentages);
+      // console.log("typeof", typeof percentages?.[0]?.percentage);
 
-      const modified = percentages?.map((data) => {
-        let amount = (Number(mrp) / 100) * Number(data?.percentage);
-        return { ...data, amount };
-      });
-      console.log("modified", modified);
+      // const modified = percentages?.map((data) => {
+      //   let amount = (Number(mrp) / 100) * Number(data?.percentage);
+      //   return { ...data, amount };
+      // });
+      // console.log("modified", modified);
 
-      const index = percentages?.findIndex((value) => value?.type === foundClient?.professional);
-      console.log("index", index);
+      // const index = percentages?.findIndex((value) => value?.type === foundClient?.professional);
+      // console.log("index", index);
 
-      const firstFiltered = modified?.slice(0, index + 1);
-      const remaings = modified?.slice(index + 1);
+      // const firstFiltered = modified?.slice(0, index + 1);
+      // const remaings = modified?.slice(index + 1);
 
-      const professionals_key = [
-        "golden_director",
-        "senior_director",
-        "director",
-        "branch_manager",
-        "manager",
-        "assistant_manager",
-        "telecalling",
-      ];
-      console.log("firstFiltered", firstFiltered);
-      console.log("remaings", remaings);
+      // const professionals_key = [
+      //   "golden_director",
+      //   "senior_director",
+      //   "director",
+      //   "branch_manager",
+      //   "manager",
+      //   "assistant_manager",
+      //   "telecalling",
+      // ];
+      // console.log("firstFiltered", firstFiltered);
+      // console.log("remaings", remaings);
 
-      const result = firstFiltered
-        .reduceRight((acc, value) => {
-          if (acc.length === 0) {
-            acc.push({ ...value, amt: value.amount });
-          } else {
-            const prev = acc[acc.length - 1];
-            const amt = value.amount - prev.amount;
-            console.log(amt);
-            acc.push({ ...value, amt: amt });
-          }
-          return acc;
-        }, [])
-        .reverse();
+      // const result = firstFiltered
+      //   .reduceRight((acc, value) => {
+      //     if (acc.length === 0) {
+      //       acc.push({ ...value, amt: value.amount });
+      //     } else {
+      //       const prev = acc[acc.length - 1];
+      //       const amt = value.amount - prev.amount;
+      //       console.log(amt);
+      //       acc.push({ ...value, amt: amt });
+      //     }
+      //     return acc;
+      //   }, [])
+      //   .reverse();
 
-      console.log("result", result);
+      // console.log("result", result);
 
-      const remaingsWithZero = remaings?.map((remain) => ({ ...remain, amt: 0 }));
+      // const remaingsWithZero = remaings?.map((remain) => ({ ...remain, amt: 0 }));
 
-      const finalResult = result
-        .concat(remaingsWithZero)
-        .map((data, index) => ({ ...data, name: founTeam[professionals_key[index]] }));
+      // const finalResult = result
+      //   .concat(remaingsWithZero)
+      //   .map((data, index) => ({ ...data, name: founTeam[professionals_key[index]] }));
 
       const newRegistration = await Registrationland.create({
         client_name: req.body.client_name,
@@ -510,13 +627,37 @@ exports.updatelandClient = async (req, res, next) => {
       console.log("commission_amount", commission_amount);
       console.log("remainingWithDP", remainingWithDP);
 
+      if (payment_mode === "EMI") {
+        console.log("payment mode came emi")
+        foundClient.emi_details.push({ amount: received_amount, date: Date.now(), payment_type });
+        console.log("payment mode came emidone")
+      }
+      if (payment_mode === "Installment") {
+        console.log("came here always")
+        foundClient.installment_details.push({
+          status: installment_status,
+          amount: received_amount,
+          date: Date.now(),
+          payment_type,
+        });
+      }
+
+      if (payment_mode !== "Full Payment" && installment_status === "Fully Paid") {
+        foundClient.set({
+          ...req.body,
+          overAllGivenAmount: received_amount,
+          full_payment_type: payment_type,
+          pending_amount: Number(foundClient?.pending_amount) - Number(received_amount)
+        });
+      }
+
       await Boughtland.create({
         ...foundClient.toObject(),
         registration_id: newRegistration._id,
         registration_cost,
         registration_date,
         registered_by,
-        commission_distributed: finalResult,
+        // commission_distributed: finalResult,
         commission: commission_amount,
         revenue: remainingWithDP,
       });
@@ -524,15 +665,7 @@ exports.updatelandClient = async (req, res, next) => {
       foundPlot.save();
       await Bookedland.findByIdAndDelete(clientObjectId);
     }
-    if (payment_mode === "Full Payment" && installment_status !== "Fully Paid") {
-      foundClient.set({
-        ...req.body,
-        payment_mode: "Full Payment",
-        overAllGivenAmount: received_amount,
-        full_payment_type: payment_type,
-      });
-      await foundClient.save();
-    }
+
 
     res.status(200).json({
       success: true,
@@ -659,7 +792,7 @@ exports.bookPlot = async (req, res, next) => {
         location: req.body.city || "",
         amount: req.body.token_advance,
         payment_type,
-        assigned_to: req?.body?.assigned_to || undefined,
+        assigned_to: req?.body?.assigned_to,
         site_id: site_id,
         plot_id: plot_id,
       });
@@ -698,12 +831,8 @@ exports.bookPlot = async (req, res, next) => {
       await newClient.save();
     } else {
       if (Number(plot.mrp) !== Number(received_amount) + Number(token_advance)) {
-        return res.status(400).json({
-          success : false,
-          message : "Payment is not equal to mrp"
-        })
+        return next(new ErrorHandler(400, "Payment is not equal to mrp"));
       }
-      // console.log("Came type",payment_mode,installment_status)
 
       if (payment_mode === "Full Payment" && installment_status !== "Fully Paid") {
         newClient = await Booked.create({
@@ -720,10 +849,18 @@ exports.bookPlot = async (req, res, next) => {
           site_id,
           plot_id,
         });
-      console.log("Came Here",payment_type)
+        await newClient.save();
+
 
       }
-      // await newClient.save();
+
+      if (payment_mode === "Full Payment" && installment_status === "Fully Paid") {
+        return res.status(400).json({
+          success: false,
+          message: "Try making payment in instalments"
+        })
+      }
+
     }
 
     await Plot.findByIdAndUpdate(plot_id, {
@@ -1517,6 +1654,69 @@ exports.getBoughtOne = async (req, res) => {
   }
 };
 
+exports.getBoughtOneLand = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await Boughtland.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "site_id",
+          foreignField: "_id",
+          as: "site",
+        },
+      },
+      {
+        $unwind: {
+          path: "$site",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "landplots",
+          localField: "plot_id",
+          foreignField: "_id",
+          as: "plot",
+        },
+      },
+      {
+        $lookup: {
+          from: "bookinglands",
+          localField: "booking_id",
+          foreignField: "_id",
+          as: "booking_id",
+        },
+      },
+      {
+        $unwind: {
+          path: "$booking_id",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $unwind: {
+          path: "$plot",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]);
+    if (!client.length) {
+      return res.status(400).json({ success: false, message: "Bought Client Not Found" });
+    }
+    res.status(200).json({
+      success: true,
+      messge: "Get Bought Client Details Fetch Successfully",
+      data: client[0],
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Error Getting Bought by ID", err });
+  }
+};
+
 exports.updateAmount = async (req, res, next) => {
   try {
     const { client_id, amount } = req.query;
@@ -1602,17 +1802,17 @@ exports.getAllpayment = async (req, res, next) => {
     const BookedData = await Booked
       .aggregate([
         {
-          $lookup : {
-            from : "plots",
-            localField : "plot_id",
-            foreignField : "_id",
-            as : "plot"
+          $lookup: {
+            from: "plots",
+            localField: "plot_id",
+            foreignField: "_id",
+            as: "plot"
           }
         },
         {
-          $unwind : {
-            path : "$plot",
-            preserveNullAndEmptyArrays : true,
+          $unwind: {
+            path: "$plot",
+            preserveNullAndEmptyArrays: true,
           }
         },
         {
@@ -1620,22 +1820,22 @@ exports.getAllpayment = async (req, res, next) => {
             _id: null,
             totalPendingAmount: { $sum: "$pending_amount" },
             totaloverAllGivenAmount: { $sum: "$overAllGivenAmount" },
-            totalFinalAgreementValue : {$sum : "$plot.final_agreement_value"}
+            totalFinalAgreementValue: { $sum: "$plot.final_agreement_value" }
           }
         }
       ])
-      
-    if(BookedData.length > 0){
+
+    if (BookedData.length > 0) {
       res.status(200).json({
-        success : true,
-        message : "Customer payment data fetched successfully",
-        data : BookedData
+        success: true,
+        message: "Customer payment data fetched successfully",
+        data: BookedData
       })
-    }else{
+    } else {
       res.status(200).json({
-        success : true,
-        message : "No data found",
-        data : ""
+        success: true,
+        message: "No data found",
+        data: ""
       })
     }
 
@@ -1746,8 +1946,8 @@ exports.bookLandPlot = async (req, res, next) => {
     } else {
       if (Number(plot.mrp) !== Number(received_amount) + Number(token_advance)) {
         return res.status(400).json({
-          success : false,
-          message : "Payment is not equal to mrp"
+          success: false,
+          message: "Payment is not equal to mrp"
         })
       }
 
@@ -1766,9 +1966,18 @@ exports.bookLandPlot = async (req, res, next) => {
           site_id,
           plot_id,
         });
+
+        await newClient.save();
+
       }
 
-      await newClient.save();
+      if (payment_mode === "Full Payment" && installment_status === "Fully Paid") {
+        return res.status(400).json({
+          success: false,
+          message: "Try making payment in installments"
+        })
+      }
+
     }
 
     await Landplot.findByIdAndUpdate(plot_id, {
