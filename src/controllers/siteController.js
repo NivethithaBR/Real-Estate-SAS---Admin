@@ -1,5 +1,7 @@
 const { mongoose, Types } = require("mongoose");
 const Site = require("../models/Site");
+const Land = require("../models/Land");
+const Landplot = require("../models/Landplot");
 const Plot = require("../models/Plot");
 const { uploader } = require("../utils/helpers");
 const cloudinary = require("../utils/cloudinary");
@@ -118,6 +120,78 @@ exports.getAllSite = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ success: false, message: "Failed to Get Apartment Project", err });
+  }
+};
+
+exports.getAllLandBySiteId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ObjectId = new Types.ObjectId(id);
+    const plots = await Landplot.find({ site_id: ObjectId });
+    if(plots.length > 0){
+      return res.status(200).json({
+      message: "Get all plots by land id successfully",
+      success: true,
+      data: plots,
+    });
+    }
+    return res.status(200).json({
+      message: "No data found",
+      success: false,
+      data: "",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching land plot" });
+  }
+};
+
+exports.getAlllandlist = async (req, res) => {
+  try {
+    const { site_name } = req.query;
+
+    const filter = {};
+    if (site_name) {
+      filter.site_name = { $regex: site_name, $options: "i" };
+    }
+    const sites = await Land.find(filter);
+    if (!sites.length) {
+      return res.status(404).json({ success: false, message: "No Apartment Projects found" });
+    }
+
+    const siteWithPlotCounts = await Promise.all(
+      sites.map(async (site) => {
+        const plotCounts = await Landplot.aggregate([
+          {
+            $match: { site_id: site._id },
+          },
+          {
+            $group: {
+              _id: "$plot_status",
+              count: { $sum: 1 },
+            },
+          },
+        ]);
+
+        const plotCountObj = { Available: 0, Booked: 0, Sold: 0, Declined: 0 };
+        plotCounts.forEach((item) => {
+          if (plotCountObj.hasOwnProperty(item._id)) {
+            plotCountObj[item._id] = item.count;
+          }
+        });
+        return {
+          ...site.toObject(),
+          plotCounts: plotCountObj,
+        };
+      })
+    );
+    res.status(200).json({
+      success: true,
+      message: "Get Land Project Successfully",
+      totalSites: siteWithPlotCounts.length,
+      sites: siteWithPlotCounts,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: "Failed to Get Land Project", err });
   }
 };
 

@@ -14,6 +14,8 @@ router.post(
   siteCtrl.createSite
 );
 router.get("/getAllsites", siteCtrl.getAllSite);
+router.get("/getAllLandlist", siteCtrl.getAlllandlist);
+router.get("/getAllLandBySiteId/:id", siteCtrl.getAllLandBySiteId);
 router.get("/getbyid/:id", siteCtrl.getById);
 router.get("/search", siteCtrl.getFilteredSites);
 router.get("/populate-plots", siteCtrl.getSiteWithAvailablePlots);

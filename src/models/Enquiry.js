@@ -27,7 +27,10 @@ const EnquirySchema = new mongoose.Schema({
         type : String,
     },
     site_id:{type: mongoose.Schema.Types.ObjectId, ref:'Site'},
-    plot_id:{type: mongoose.Schema.Types.ObjectId, ref:'Plot'}
+    plot_id:{type: mongoose.Schema.Types.ObjectId, ref:'Plot'},
+    leadtype : {
+     type : String
+    }
 },{
     timestamps: true,
 });
