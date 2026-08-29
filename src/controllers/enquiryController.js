@@ -36,8 +36,8 @@ exports.addEnquiry = async (req, res) => {
 
     const newClient = new Enquiry({
       ...req.body,
-      plot_id: plot,
-      site_id: site,
+      plot_id: req?.body?.leadtype == "Apartments" ? plot : req?.body?.landplot,
+      site_id: req?.body?.leadtype == "Apartments" ? site : req?.body?.land,
     });
     await newClient.save();
     // if (followup_date && followup_time) {
@@ -156,6 +156,22 @@ exports.searchEnquiry = async (req, res) => {
                 as: "plot",
               },
             },
+            {
+              $lookup: {
+                from: "lands",
+                localField: "site_id",
+                foreignField: "_id",
+                as: "landdata",
+              },
+            },
+            {
+              $lookup: {
+                from: "landplots",
+                localField: "plot_id",
+                foreignField: "_id",
+                as: "landplots",
+              },
+            },
 
             {
               $unwind: {
@@ -166,6 +182,18 @@ exports.searchEnquiry = async (req, res) => {
             {
               $unwind: {
                 path: "$plot",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $unwind: {
+                path: "$landdata",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $unwind: {
+                path: "$landplots",
                 preserveNullAndEmptyArrays: true,
               },
             },
@@ -211,9 +239,14 @@ exports.updateEnquiry = async (req, res) => {
       remarks,
       site,
       plot,
+      landplot,
+      land
     } = req.body;
     const { enquiryId } = req.params;
-
+    const getOldData = await Enquiry.findOne({_id : enquiryId})
+    console.log(req.body,"datas ",getOldData?.leadtype,enquiryId,getOldData?._id," got", )
+    console.log(getOldData?.leadtype == "Apartments" ? site : land,"site")
+    console.log(getOldData?.leadtype == "Apartments" ? plot : landplot,"plot")
     const updatedEnquiry = await Enquiry.findByIdAndUpdate(
       enquiryId,
       {
@@ -226,8 +259,8 @@ exports.updateEnquiry = async (req, res) => {
         city,
         visit_date,
         remarks,
-        site_id: site,
-        plot_id: plot,
+        site_id: getOldData?.leadtype == "Apartments" ? site : land,
+        plot_id: getOldData?.leadtype == "Apartments" ? plot : landplot,
       },
       { new: true },
     );
@@ -296,6 +329,34 @@ exports.getEnquiryOne = async (req, res) => {
       {
         $unwind: {
           path: "$plot",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "lands",
+          localField: "site_id",
+          foreignField: "_id",
+          as: "landdata",
+        },
+      },
+      {
+        $unwind: {
+          path: "$landdata",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "landplots",
+          localField: "plot_id",
+          foreignField: "_id",
+          as: "landplots",
+        },
+      },
+      {
+        $unwind: {
+          path: "$landplots",
           preserveNullAndEmptyArrays: true,
         },
       },
